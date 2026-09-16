@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/totoland/sqlmcp/internal/engine"
@@ -32,6 +34,7 @@ func New(st *store.Store, web fs.FS) *Server {
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", s.health)
+	mux.HandleFunc("POST /api/test-connection", s.testUnsavedConnection)
 	mux.HandleFunc("GET /api/connections", s.listConnections)
 	mux.HandleFunc("POST /api/connections", s.saveConnection)
 	mux.HandleFunc("GET /api/connections/{id}", s.getConnection)
@@ -117,6 +120,26 @@ func (s *Server) testConnection(w http.ResponseWriter, r *http.Request) {
 	_ = c
 	_ = db.Close()
 	writeJSON(w, 200, map[string]any{"ok": true})
+}
+
+func (s *Server) testUnsavedConnection(w http.ResponseWriter, r *http.Request) {
+	var c store.Connection
+	if err := readJSON(r, &c); err != nil {
+		writeErr(w, 400, err)
+		return
+	}
+	c.Driver = strings.ToLower(strings.TrimSpace(c.Driver))
+	if c.Driver == "" {
+		writeErr(w, 400, fmt.Errorf("driver is required"))
+		return
+	}
+	db, err := engine.Open(c)
+	if err != nil {
+		writeErr(w, 400, err)
+		return
+	}
+	_ = db.Close()
+	writeJSON(w, 200, map[string]any{"ok": true, "driver": c.Driver})
 }
 
 func (s *Server) listTables(w http.ResponseWriter, r *http.Request) {

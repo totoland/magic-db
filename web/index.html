@@ -54,7 +54,9 @@
       <label>Database<input name="database" /></label>
       <label>DSN override<input name="dsn" placeholder="optional full DSN" /></label>
       <label class="check"><input type="checkbox" name="readOnly" checked /> Read-only (blocks writes)</label>
+      <p id="testResult"></p>
       <menu>
+        <button type="button" class="btn" id="testConn">Test</button>
         <button value="cancel" class="btn">Cancel</button>
         <button value="save" class="btn primary">Save</button>
       </menu>

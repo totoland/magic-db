@@ -111,11 +111,9 @@ sqlEl.addEventListener("keydown", (e) => {
   }
 });
 
-$("newConn").onclick = () => $("connDialog").showModal();
-$("connForm").addEventListener("close", async (e) => {
-  if ($("connForm").returnValue !== "save") return;
+function connectionFromForm() {
   const fd = new FormData($("connForm"));
-  const body = {
+  return {
     name: fd.get("name"),
     driver: fd.get("driver"),
     host: fd.get("host"),
@@ -126,6 +124,31 @@ $("connForm").addEventListener("close", async (e) => {
     dsn: fd.get("dsn"),
     readOnly: fd.has("readOnly"),
   };
+}
+
+$("newConn").onclick = () => {
+  $("testResult").textContent = "";
+  $("connDialog").showModal();
+};
+
+$("testConn").onclick = async (e) => {
+  e.preventDefault();
+  const result = $("testResult");
+  result.textContent = "Testing...";
+  result.className = "";
+  try {
+    await api("/api/test-connection", { method: "POST", body: JSON.stringify(connectionFromForm()) });
+    result.textContent = "Connection OK";
+    result.className = "ok";
+  } catch (err) {
+    result.textContent = err.message;
+    result.className = "err";
+  }
+};
+
+$("connForm").addEventListener("close", async () => {
+  if ($("connForm").returnValue !== "save") return;
+  const body = connectionFromForm();
   try {
     const saved = await api("/api/connections", { method: "POST", body: JSON.stringify(body) });
     await loadConns();
