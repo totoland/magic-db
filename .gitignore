@@ -1,0 +1,4 @@
+sqlmcp
+*.exe
+data/
+.DS_Store

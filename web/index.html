@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>sqlmcp</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <aside>
+    <div class="brand">
+      <div class="logo">SQL</div>
+      <div>
+        <h1>sqlmcp</h1>
+        <p>TablePlus-style SQL + MCP</p>
+      </div>
+    </div>
+    <button class="btn primary" id="newConn">New connection</button>
+    <div class="section-label">Connections</div>
+    <div id="connList" class="list"></div>
+    <div class="section-label">Tables</div>
+    <div id="tableList" class="list"></div>
+  </aside>
+  <main>
+    <header>
+      <div id="activeMeta">No connection</div>
+      <div class="actions">
+        <label class="check"><input type="checkbox" id="allowWrite" /> Allow writes</label>
+        <button class="btn" id="runBtn">Run ⌘↵</button>
+      </div>
+    </header>
+    <textarea id="sql" spellcheck="false" placeholder="SELECT * FROM ..."></textarea>
+    <section class="result">
+      <div id="status">Ready</div>
+      <div class="table-wrap"><table id="grid"></table></div>
+    </section>
+  </main>
+  <dialog id="connDialog">
+    <form method="dialog" id="connForm">
+      <h2>Connection</h2>
+      <label>Name<input name="name" required /></label>
+      <label>Driver
+        <select name="driver">
+          <option value="sqlite">SQLite</option>
+          <option value="postgres">PostgreSQL</option>
+          <option value="mysql">MySQL</option>
+          <option value="mssql">SQL Server</option>
+        </select>
+      </label>
+      <label>Host / SQLite path<input name="host" placeholder="127.0.0.1 or /path/to.db" /></label>
+      <label>Port<input name="port" type="number" /></label>
+      <label>User<input name="user" /></label>
+      <label>Password<input name="password" type="password" /></label>
+      <label>Database<input name="database" /></label>
+      <label>DSN override<input name="dsn" placeholder="optional full DSN" /></label>
+      <label class="check"><input type="checkbox" name="readOnly" checked /> Read-only (blocks writes)</label>
+      <menu>
+        <button value="cancel" class="btn">Cancel</button>
+        <button value="save" class="btn primary">Save</button>
+      </menu>
+    </form>
+  </dialog>
+  <script src="/app.js"></script>
+</body>
+</html>
