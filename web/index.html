@@ -36,7 +36,7 @@
     </section>
   </main>
   <dialog id="connDialog">
-    <form method="dialog" id="connForm">
+    <form id="connForm">
       <h2>Connection</h2>
       <label>Name<input name="name" required /></label>
       <label>Driver
@@ -57,8 +57,8 @@
       <p id="testResult"></p>
       <menu>
         <button type="button" class="btn" id="testConn">Test</button>
-        <button value="cancel" class="btn">Cancel</button>
-        <button value="save" class="btn primary">Save</button>
+        <button type="button" class="btn" id="cancelConn">Cancel</button>
+        <button type="submit" class="btn primary" id="saveConn">Save</button>
       </menu>
     </form>
   </dialog>

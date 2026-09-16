@@ -128,8 +128,12 @@ function connectionFromForm() {
 
 $("newConn").onclick = () => {
   $("testResult").textContent = "";
+  $("testResult").className = "";
+  $("connForm").reset();
   $("connDialog").showModal();
 };
+
+$("cancelConn").onclick = () => $("connDialog").close();
 
 $("testConn").onclick = async (e) => {
   e.preventDefault();
@@ -146,15 +150,27 @@ $("testConn").onclick = async (e) => {
   }
 };
 
-$("connForm").addEventListener("close", async () => {
-  if ($("connForm").returnValue !== "save") return;
-  const body = connectionFromForm();
+$("connForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const result = $("testResult");
+  const saveBtn = $("saveConn");
+  saveBtn.disabled = true;
+  result.textContent = "Saving...";
+  result.className = "";
   try {
-    const saved = await api("/api/connections", { method: "POST", body: JSON.stringify(body) });
+    const saved = await api("/api/connections", { method: "POST", body: JSON.stringify(connectionFromForm()) });
+    result.textContent = "Saved";
+    result.className = "ok";
+    $("connDialog").close();
     await loadConns();
     await selectConn(saved.id);
+    setStatus(`Saved ${saved.name}`);
   } catch (err) {
+    result.textContent = err.message;
+    result.className = "err";
     setStatus(err.message, false);
+  } finally {
+    saveBtn.disabled = false;
   }
 });
 
