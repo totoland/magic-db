@@ -15,7 +15,7 @@ Go SQL client in the TablePlus/DataGrip style, with an embedded MCP server.
 
 ```bash
 cd ~/git/sqlmcp
-go run . -addr 127.0.0.1:3847
+go run . -addr 0.0.0.0:3847
 ```
 
 Open http://127.0.0.1:3847

@@ -19,7 +19,7 @@ import (
 var webFS embed.FS
 
 func main() {
-	addr := flag.String("addr", "127.0.0.1:3847", "HTTP listen address")
+	addr := flag.String("addr", "0.0.0.0:3847", "HTTP listen address")
 	dataDir := flag.String("data", defaultDataDir(), "data directory")
 	mcpMode := flag.Bool("mcp", false, "run as MCP stdio server")
 	flag.Parse()

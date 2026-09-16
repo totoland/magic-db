@@ -218,6 +218,53 @@ func ListTables(ctx context.Context, db *sql.DB, driver string) ([]TableInfo, er
 	return out, rows.Err()
 }
 
+type SchemaColumn struct {
+	Schema string `json:"schema"`
+	Table  string `json:"table"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+}
+
+func ListSchemaColumns(ctx context.Context, db *sql.DB, driver string) ([]SchemaColumn, error) {
+	var q string
+	switch driver {
+	case "postgres":
+		q = `SELECT table_schema, table_name, column_name, data_type
+		     FROM information_schema.columns
+		     WHERE table_schema NOT IN ('pg_catalog','information_schema')
+		     ORDER BY table_schema, table_name, ordinal_position`
+	case "mysql":
+		q = `SELECT table_schema, table_name, column_name, column_type
+		     FROM information_schema.columns
+		     WHERE table_schema = DATABASE()
+		     ORDER BY table_name, ordinal_position`
+	case "mssql":
+		q = `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE
+		     FROM INFORMATION_SCHEMA.COLUMNS
+		     ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION`
+	default:
+		q = `SELECT 'main', m.name, p.name, p.type
+		     FROM sqlite_master m
+		     JOIN pragma_table_info(m.name) p
+		     WHERE m.type IN ('table','view') AND m.name NOT LIKE 'sqlite_%'
+		     ORDER BY m.name, p.cid`
+	}
+	rows, err := db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []SchemaColumn{}
+	for rows.Next() {
+		var c SchemaColumn
+		if err := rows.Scan(&c.Schema, &c.Table, &c.Name, &c.Type); err != nil {
+			return nil, err
+		}
+		out = append(out, c)
+	}
+	return out, rows.Err()
+}
+
 func DescribeTable(ctx context.Context, db *sql.DB, driver, schema, table string) ([]ColumnInfo, error) {
 	var q string
 	var args []any

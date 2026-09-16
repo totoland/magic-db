@@ -41,6 +41,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("DELETE /api/connections/{id}", s.deleteConnection)
 	mux.HandleFunc("POST /api/connections/{id}/test", s.testConnection)
 	mux.HandleFunc("GET /api/connections/{id}/tables", s.listTables)
+	mux.HandleFunc("GET /api/connections/{id}/schema", s.listSchema)
 	mux.HandleFunc("GET /api/connections/{id}/tables/{table}", s.describeTable)
 	mux.HandleFunc("POST /api/connections/{id}/query", s.runQuery)
 	mux.HandleFunc("GET /api/history", s.history)
@@ -157,6 +158,23 @@ func (s *Server) listTables(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, 200, tables)
+}
+
+func (s *Server) listSchema(w http.ResponseWriter, r *http.Request) {
+	c, db, err := s.open(r.PathValue("id"))
+	if err != nil {
+		writeErr(w, 400, err)
+		return
+	}
+	defer db.Close()
+	ctx, cancel := context.WithTimeout(r.Context(), s.Timeout)
+	defer cancel()
+	cols, err := engine.ListSchemaColumns(ctx, db, c.Driver)
+	if err != nil {
+		writeErr(w, 400, err)
+		return
+	}
+	writeJSON(w, 200, cols)
 }
 
 func (s *Server) describeTable(w http.ResponseWriter, r *http.Request) {
